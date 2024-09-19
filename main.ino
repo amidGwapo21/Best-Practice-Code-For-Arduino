@@ -1,18 +1,25 @@
-#include "SerialReceiver.h"
+#include <Arduino.h>
+#include "SerialCommunication.h"
 
-const int bufferSize = 50; // Define buffer size
-SerialReceiver serialReceiver(bufferSize); // Create an instance of SerialReceiver
+SerialCommunication serialComm;
 
 void setup() {
-    serialReceiver.begin(115200); // Initialize serial communication at 115200 baud
-    Serial.println("Serial Receiver Initialized");
+    serialComm.init();
 }
 
 void loop() {
-    String receivedData = serialReceiver.readData(); // Read data from serial
-    if (receivedData.length() > 0) {
-        Serial.print("Received: ");
-        Serial.println(receivedData); // Print received data to the Serial Monitor
+    if (serialComm.available()) {
+        const char* receivedCommand = serialComm.readCommand();
+        if (receivedCommand != nullptr) {
+            Serial.print("Received command: ");
+            Serial.println(receivedCommand);
+          if (String(receivedCommand) == "amid"){
+            Serial.println("amid is true");
+          }
+            // Send response
+            // const char* response = receivedCommand;
+            // serialComm.sendResponse(response);
+        }
+
     }
-    delay(1000); // Wait before the next reading
 }
