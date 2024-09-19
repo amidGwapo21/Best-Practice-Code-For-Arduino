@@ -1,24 +1,43 @@
-#include "SerialReceiver.h"
-#include <Arduino.h>
+#include "SerialCommunication.h"
 
-SerialReceiver::SerialReceiver(int bufferSize) {
-    _bufferSize = bufferSize;
-    _buffer = new char[_bufferSize]; // Allocate buffer
+void SerialCommunication::init() {
+    Serial.begin(SERIAL_BAUDRATE);
 }
 
-void SerialReceiver::begin(long baudRate) {
-    Serial.begin(baudRate); // Start serial communication
+bool SerialCommunication::available() {
+    return Serial.available() > 0;
 }
 
-String SerialReceiver::readData() {
-    int index = 0;
-    while (Serial.available() > 0 && index < _bufferSize - 1) {
-        char c = Serial.read(); // Read a character
-        if (c == '\n') { // Stop reading if newline character is encountered
-            break;
+const char* SerialCommunication::readCommand() {
+    if (Serial.readBytesUntil('\n', buffer_, buffer_size)) {
+        buffer_[buffer_size - 1] = '\0'; // Null-terminate
+
+         // Parse the received data
+        char *command = strtok(buffer_, "@");
+        char *username = strtok(NULL, "@");
+        char *userid = strtok(NULL, "@");
+        
+        Serial.println(command);
+        // Check if the data is valid
+        if (command != NULL && username != NULL && userid != NULL) {
+            // Compare the command
+            if (strcmp(command, "active") == 0) {
+                Serial.print("Username: ");
+                Serial.println(username);
+                Serial.print("User ID: ");
+                Serial.println(userid);
+            } else {
+                Serial.println("Unknown command.");
+            }
+        } else {
+            Serial.println("Invalid data format.");
         }
-        _buffer[index++] = c; // Add character to buffer
+        return buffer_;
     }
-    _buffer[index] = '\0'; // Null-terminate the string
-    return String(_buffer); // Return as a String
+    return nullptr;
+}
+
+void SerialCommunication::sendResponse(const char* message) {
+    Serial.print("Sending back: ");
+    Serial.println(message);
 }
