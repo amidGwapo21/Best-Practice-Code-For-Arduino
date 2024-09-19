@@ -1,14 +1,20 @@
-#ifndef SerialReceiver_h
-#define SerialReceiver_h
+#ifndef SERIALCOMMUNICATION_H
+#define SERIALCOMMUNICATION_H
 
-class SerialReceiver {
+#include <Arduino.h>
+
+#define MAX_COMMAND_LENGTH 50
+#define SERIAL_BAUDRATE 115200
+
+class SerialCommunication {
 public:
-    SerialReceiver(int bufferSize); // Constructor to set up the buffer size
-    void begin(long baudRate); // Initialize serial communication
-    String readData(); // Method to read data from serial
+    void init();
+    bool available();
+    const char* readCommand();
+    void sendResponse(const char* message);
 private:
-    int _bufferSize; // Size of the buffer
-    char* _buffer; // Pointer to hold the buffer
+    static constexpr size_t buffer_size = MAX_COMMAND_LENGTH;
+    char buffer_[buffer_size];
 };
 
-#endif
+#endif // SERIALCOMMUNICATION_H
